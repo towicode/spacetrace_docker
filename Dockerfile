@@ -11,11 +11,11 @@ RUN yum install which -y
 RUN dnf install python2-devel -y
 
 #   Install python dependencies
-RUN pip install --user numpy
-RUN pip install --user scipy
-RUN pip install --user pyfits
-RUN pip install --user Pillow
-RUN pip install --user PyEphem
+RUN pip install numpy
+RUN pip install scipy
+RUN pip install pyfits
+RUN pip install Pillow
+RUN pip install PyEphem
 
 
 COPY AstrometryV2 /usr/local/
