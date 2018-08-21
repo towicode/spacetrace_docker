@@ -1,4 +1,5 @@
 FROM fedora:28
+LABEL MAINTAINER bcf_staff
 
 #   Install basic software
 RUN yum update -y
@@ -9,6 +10,8 @@ RUN yum install gcc -y
 RUN yum install redhat-rpm-config -y
 RUN yum install which -y
 RUN dnf install python2-devel -y
+
+RUN ln -s /usr/bin/sex /usr/bin/sextractor
 
 #   Install python dependencies
 RUN pip install numpy
@@ -21,7 +24,9 @@ RUN pip install PyEphem
 COPY AstrometryV2 /usr/local/
 WORKDIR /usr/local
 
+RUN chmod +x test.sh
 RUN chmod +x autoCoords.py
 RUN chmod +x findObject.py
 RUN chmod +x getCoords.py
 
+ENTRYPOINT [ "/usr/local/test.sh" ]
