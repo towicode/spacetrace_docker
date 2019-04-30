@@ -1,0 +1,72 @@
+FROM jupyter/datascience-notebook
+
+COPY jupyter_notebook_config.json /opt/conda/etc/jupyter/jupyter_notebook_config.json
+
+USER root
+
+# Install the icommands, curl, and wget
+RUN apt-get update \
+    && apt-get install -y lsb wget gnupg apt-transport-https python3.6 python-requests curl \
+    && apt-get clean \
+    && rm -rf /usr/lib/apt/lists/* \
+    && fix-permissions $CONDA_DIR
+
+RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | apt-key add - \
+    && echo "deb [arch=amd64] https://packages.irods.org/apt/ xenial main" > /etc/apt/sources.list.d/renci-irods.list \
+    && apt-get update \
+    && apt-get install -y irods-icommands \
+    && apt-get clean \
+    && rm -rf /usr/lib/apt/lists/* \
+    && fix-permissions $CONDA_DIR
+
+RUN apt-get install -y scamp
+RUN apt-get install -y sextractor
+
+
+USER jovyan
+
+# install foundational jupyter lab
+RUN conda update -n base conda \
+    && conda install jupyterlab=0.35.4 \
+    && conda clean -tipsy \
+    && fix-permissions $CONDA_DIR
+
+# install jupyter hub and extra doodads
+RUN jupyter lab --version \
+    && jupyter labextension install @jupyterlab/hub-extension@0.12.0 \
+                                    @jupyter-widgets/jupyterlab-manager@0.38.1 \
+                                    jupyterlab_bokeh@0.6.3
+
+
+RUN pip install numpy
+RUN pip install scipy
+RUN pip install pyfits
+RUN pip install Pillow
+RUN pip install PyEphem
+
+USER root
+
+RUN wget http://cdsarc.u-strasbg.fr/ftp/pub/sw/cdsclient.tar.gz
+RUN tar xvfz cdsclient.tar.gz
+RUN cd cdsclient-3.84 && ls && sh configure && make && make install
+
+RUN apt-get install -y python-pip
+
+USER jovyan
+
+RUN python2 -m pip install ipykernel
+RUN python2 -m pip install numpy
+RUN python2 -m pip install scipy
+RUN python2 -m pip install pyfits
+RUN python2 -m pip install Pillow
+RUN python2 -m pip install PyEphem
+RUN python2 -m pip install ipywidgets
+RUN python2 -m ipykernel install --use
+
+COPY AstrometryV2 /home/jovyan
+
+USER root
+
+
+ENTRYPOINT ["jupyter"]
+CMD ["lab", "--allow-root"]

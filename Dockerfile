@@ -1,32 +1,31 @@
-FROM fedora:28
-LABEL MAINTAINER bcf_staff
+FROM discoenv/jupyter-lab:beta
 
-#   Install basic software
-RUN yum update -y
-RUN yum install scamp -y
-RUN yum install sextractor -y
-RUN yum install python -y
-RUN yum install gcc -y
-RUN yum install redhat-rpm-config -y
-RUN yum install which -y
-RUN dnf install python2-devel -y
+USER root
 
-RUN ln -s /usr/bin/sex /usr/bin/sextractor
+RUN apt-get install -y scamp
+RUN apt-get install -y sextractor
 
-#   Install python dependencies
-RUN pip install numpy
-RUN pip install scipy
-RUN pip install pyfits
-RUN pip install Pillow
-RUN pip install PyEphem
+RUN wget http://cdsarc.u-strasbg.fr/ftp/pub/sw/cdsclient.tar.gz
+RUN tar xvfz cdsclient.tar.gz
+RUN cd cdsclient-3.84 && ls && sh configure && make && make install
+
+RUN apt-get install -y python-pip
+
+USER jovyan
+
+RUN python2 -m pip install ipykernel
+RUN python2 -m pip install numpy
+RUN python2 -m pip install scipy
+RUN python2 -m pip install pyfits
+RUN python2 -m pip install Pillow
+RUN python2 -m pip install PyEphem
+RUN python2 -m pip install ipywidgets
+RUN python2 -m ipykernel install --use
+
+COPY AstrometryV2 /home/jovyan
+
+USER root
 
 
-COPY AstrometryV2 /usr/local/
-WORKDIR /usr/local
-
-RUN chmod +x test.sh
-RUN chmod +x autoCoords.py
-RUN chmod +x findObject.py
-RUN chmod +x getCoords.py
-
-ENTRYPOINT [ "/usr/local/test.sh" ]
+ENTRYPOINT ["jupyter"]
+CMD ["lab", "--allow-root"]
