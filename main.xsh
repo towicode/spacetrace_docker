@@ -67,7 +67,9 @@ f.close()
 
 
 #   We call reduce with these arguments.
-python2 reduce.py -p -a Config/vscope26624_05s1x.ahead -c GAIA-2 -x Config/standard.sex tmplist.txt
+python2 reduce.py -p -a Config/@(str(args[3])) -c @(str(args[4])) -x Config/@(str(args[5])) tmplist.txt
+
+#python2 reduce.py -p -a Config/vscope26624_05s1x.ahead -c GAIA-2 -x Config/standard.sex tmplist.txt
 
 #   We use the work from reduce to call findobject.
 mkdir work
